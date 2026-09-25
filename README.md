@@ -4,13 +4,7 @@ A Python-based credential and diploma generation application developed to automa
 
 The application uses student credential data to generate formatted diploma documents from Microsoft Word templates, reducing the amount of manual processing required when producing diplomas and replacement credentials.
 
-<! --
-```markdown
-## Application Interface
 
-Sample%20Files%20and%20Templates/User%20Interface.png
-
--->
 ## Features
 
 - Generates diploma documents using Python

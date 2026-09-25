@@ -4,6 +4,10 @@ A Python-based credential and diploma generation application developed to automa
 
 The application uses student credential data to generate formatted diploma documents from Microsoft Word templates, reducing the amount of manual processing required when producing diplomas and replacement credentials.
 
+## Application Interface
+
+Sample%20Files%20and%20Templates/User%20Interface.png
+
 ## Features
 
 - Generates diploma documents using Python
@@ -33,7 +37,7 @@ PythonCredentialGenerator/
 │   └── treebase.ini
 │
 ├── Sample Files and Templates/
-│   ├── DoD user Interface.PNG
+│   ├── User Interface.png
 │   └── PythonCredentialGenerator.py
 │
 ├── Scripts for SQLite DB/
@@ -47,9 +51,10 @@ PythonCredentialGenerator/
 
 - Python
 - SQLite
-- Microsoft Word document templates
 - SQL
-- Git / GitHub
+- Microsoft Word document templates
+- Git
+- GitHub
 
 ## Production and Test Versions
 
@@ -71,7 +76,7 @@ Testing files and templates are located in:
 NSCC Credential Generator TEST/
 ```
 
-This allows changes to be tested without modifying the production version of the application.
+This separation allows changes to be tested without modifying the production version of the application.
 
 ## Data Privacy
 
@@ -81,13 +86,13 @@ Production databases and other files containing protected or sensitive student i
 
 Generated credential output and other locally generated data files may also be excluded from source control.
 
-Users implementing this application should ensure that student information is handled in accordance with applicable institutional policies and data-security requirements.
+Users implementing this application should ensure that student information is handled in accordance with applicable institutional policies and data security requirements.
 
 ## Purpose
 
 This project was developed to improve the efficiency and consistency of diploma and credential production by replacing portions of a manual document-generation process with a Python-based workflow.
 
-It also serves as an example of using Python, SQL, SQLite, and Microsoft Office document automation to support higher-education administrative processes.
+It also serves as an example of using Python, SQL, SQLite, and Microsoft Office document automation to support higher education administrative processes.
 
 ## Notes
 
@@ -97,4 +102,4 @@ Local databases and other sensitive operational data required by a production en
 
 ## Author
 
-Kevin Thomas
+**Kevin Thomas**

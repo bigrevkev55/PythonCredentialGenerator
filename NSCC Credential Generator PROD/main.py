@@ -1,0 +1,794 @@
+"""
+Author:  Kevin Thomas, Director or Admissions/Registrar
+Date:    December, 2023
+Purpose: This program will store and print student diplomas  
+
+Directions:  
+    
+may need to pip install sevaral libraries including PIP INSTALL PACKAGING
+
+"""
+
+
+##Note:  When in PROD be sure to change the tile to match the appropiate variable(line 48) and database connection on line 44/45
+
+##Note2: When in PROD be sure to change the file name variable for the Generate function 
+
+##Note3:  This program seems to work best from tht GitBash Terminal or IDLE
+
+##To Do:      
+##            1.  Update is not working
+##            2.  Move Reset/Refresh  option from Search menu to Options Menu. 
+##            3.  Need the ability to print a credential straight from interface and print multiple credentials at once.
+##            4.  Generate multiple credentials at once and print them all
+##            5.  Create an executable file so we can run on any machine
+
+import tkinter
+from tkinter import *
+from tkinter import ttk
+from tkinter import messagebox
+from tkinter import filedialog
+import sqlite3
+from tkinter import colorchooser
+from configparser import ConfigParser
+import customtkinter
+import openpyxl as opxl
+import sys
+from tkinter import PhotoImage
+#import pillow
+from PIL import ImageTk, Image
+from docxtpl import DocxTemplate
+import os
+
+#Title Bars for use in Program
+titleTEST="NSCC Credential Generator TEST TEST TEST"
+titlePROD="NSCC Credential Generator PROD"
+
+#create database variable so that you just have to change it in one place when testing (one-to-many type of approach)
+#db='TESTgraduates.db'  #TEST DB File
+db='graduates.db' #PROD DB File
+
+#create file name variable for the generate() function
+#diploma=DocxTemplate('TestNsccDiploma.docx') #TEST template name
+diploma=DocxTemplate('NsccDiplomaTemplate.docx') #PROD template name
+
+root = Tk()
+root.title(titlePROD)
+
+#Create image object for icon
+img=ImageTk.PhotoImage(Image.open("AR_LOGO.jpg"))
+icon=PhotoImage=img
+root.iconphoto(True, icon) #True sets this icon as the default icon for future top level windows
+
+#put the window on the screen
+root.pack_propagate
+
+# Read config file and get colors
+parser = ConfigParser()
+parser.read("treebase.ini")
+#configfile=("treebase.ini")
+saved_primary_color = parser.get('colors', 'primary_color')
+saved_secondary_color = parser.get('colors', 'secondary_color')
+saved_highlight_color = parser.get('colors', 'highlight_color')
+
+def under_construction():
+    messagebox.showinfo("Under Constuction", "Under Construction....check back soon")
+
+def search_by_degree():
+    under_construction()
+    
+def search_by_term():
+    under_construction()
+      
+def query_database():
+    # Clear the Treeview
+    for record in my_tree.get_children():
+        my_tree.delete(record)
+        
+    # Create a database or connect to one that exists
+    conn = sqlite3.connect(db)
+
+    # Create a cursor instance
+    c = conn.cursor()
+
+    c.execute("SELECT rowid, * FROM graduates")
+    records = c.fetchall()
+    
+    # Add our data to the screen
+    global count
+    count = 0
+    
+    #for record in records:
+    #	print(record)
+
+    for record in records:
+        if count % 2 == 0:
+            my_tree.insert(
+                parent='', index='end', iid=count, text='', values=( record[1], record[2],
+                record[3], record[4], record[5], record[6], record[7], record[8], record[9],
+                record[10], record[11], record[12]), tags=('evenrow',))
+        else:
+            my_tree.insert(parent='', index='end', iid=count, text='', values=( record[1], record[2], record[3], record[4], record[5], record[6], record[7], record[8], record[9], record[10], record[11], record[12]), tags=('oddrow',))
+        # increment counter
+        count += 1
+
+
+    # Commit changes
+    conn.commit()
+
+    # Close our connection
+    conn.close()
+
+def search_records():
+    lookup_record = search_entry.get()
+    # close the search box
+    search.destroy()
+    
+    # Clear the Treeview
+    for record in my_tree.get_children():
+        my_tree.delete(record)
+    
+    # Create a database or connect to one that exists
+    conn = sqlite3.connect(db)
+
+    # Create a cursor instance
+    c = conn.cursor()
+
+    c.execute("SELECT rowid, * FROM graduates WHERE student_id like ?", (lookup_record,))
+    records = c.fetchall()
+    
+    # Add our data to the screen
+    global count
+    count = 0
+    
+    #for record in records:
+    #	print(record)
+
+
+    for record in records:
+        if count % 2 == 0:
+            my_tree.insert(parent='', index='end', iid=count, text='', values=(record[1], record[2],
+                                    record[0], record[4], record[5], record[6], record[7], record[8], record[9],
+                                    record[10], record[11], record[12]), tags=('evenrow',))
+        else:
+            my_tree.insert(parent='', index='end', iid=count, text='', values=(record[1], record[2],
+                                    record[0], record[4], record[5], record[6], record[7], record[8], record[9],
+                                    record[10], record[11], record[12]), tags=('oddrow',))
+        
+        #increment counter
+        count += 1
+
+
+    # Commit changes
+    conn.commit()
+
+    # Close our connection
+    conn.close()
+
+def lookup_records():
+    global search_entry, search
+
+    search = Toplevel(root)
+    search.title("Lookup Records")
+    search.geometry("600x300")
+    #search.iconbitmap('c:/gui/codemy.ico')
+
+    # Create label frame
+    search_frame = LabelFrame(search, text="Student ID")
+    search_frame.pack(padx=10, pady=10)
+
+    # Add entry box
+    search_entry = Entry(search_frame, font=("Helvetica", 18))
+    search_entry.pack(pady=20, padx=20)
+
+    # Add button
+    search_button = Button(search, text="Search Records", command=search_records)
+    search_button.pack(padx=20, pady=20)
+    #search_button.pack(padx=20, pady=20)
+
+#def primary_color():
+            #parser.write(configfile)
+
+#def secondary_color():
+            #parser.write(configfile)
+
+#def highlight_color():
+            #parser.write(configfile)
+
+#def reset_colors():
+            #background=[('selected', '#347083')]
+
+def addStudent():
+    enterGradRecord=tkinter.Toplevel()
+    enterGradRecord.title("Enter a New Graduate")
+    enterGradRecord.pack_propagate(YES)
+    #grid_columnconfigure(0, weight=1)
+    #grid_rowconfigure(0, weight=1)
+
+    def save():
+            if student_id_entry.get() and term_entry.get() and grad_date_entry.get() and first_name_entry.get() and last_name_entry.get() and degree_1_entry.get() and major_1_entry.get():
+                #Get Data from form
+                id=student_id_entry.get()
+                gradTerm=term_entry.get()
+                gradDate=grad_date_entry.get()
+                firstName=first_name_entry.get()
+                middleName=middle_name_entry.get()
+                lastName=last_name_entry.get()
+                fullName=full_name_entry.get()
+                degree=degree_1_entry.get()
+                major=major_1_entry.get()
+                honor=honor_1_entry.get()
+                concentration = concentration_entry.get()
+                other=other_entry.get()
+
+                #Connect to database
+                conn = sqlite3.connect(db)
+
+                insert_query = '''INSERT INTO graduates(student_id, term, grad_date, first_name, middle_name, last_name, full_name, degree_1, major_1, honor_1, concentration, other) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)'''
+
+                values = (id,gradTerm, gradDate, firstName, middleName, lastName, fullName, degree, major, honor, concentration, other)
+
+                cursor=conn.cursor()
+                cursor.execute(insert_query, values)
+                conn.commit()
+                conn.close()
+
+                #Reset Form
+                student_id_entry.delete(0,"end")
+                term_entry.delete(0, "end")
+                grad_date_entry.delete(0, "end")
+                first_name_entry.delete(0, "end")
+                middle_name_entry.delete(0,'end')
+                last_name_entry.delete(0,"end")
+                full_name_entry.delete(0,'end')
+                degree_1_entry.delete(0,'end')
+                major_1_entry.delete(0,'end')
+                concentration_entry.delete(0,'end')
+                honor_1_entry.delete(0,'end')
+                other_entry.delete(0,'end')
+                
+                tkinter.messagebox.showinfo(title='Success!', message="graduate has been created")
+            else:
+                tkinter.messagebox.showwarning(title='Error!', message="All fields with an * must be entered")
+            
+            # Clear entry boxes
+            clear_entries()
+
+            # Clear The Treeview Table
+            my_tree.delete(*my_tree.get_children())
+
+            # Run to pull data from database on start
+            query_database()
+
+    def close():
+            enterGradRecord.destroy()
+
+    #student information frame
+    studentInfoFrame = customtkinter.CTkFrame(enterGradRecord)
+    studentInfoFrame.grid(row=0, column=0)
+    testLabel=Label(studentInfoFrame, text="Enter Graduate Information", padx=10, pady=10)
+    testLabel.grid(row=0, column=0, columnspan=5)
+
+    student_id_entry_label = Label(studentInfoFrame, text="*Student ID")
+    student_id_entry_label.grid(row=1, column=0, padx=10, pady=10, sticky='ew')
+    student_id_entry=ttk.Entry(studentInfoFrame)
+    student_id_entry.grid(row=1, column=1, padx=10, pady=10, sticky='ew')
+        
+    term_entry_label = Label(studentInfoFrame, text="*Graduation Term")
+    term_entry_label.grid(row=2, column=0, padx=10, pady=10, sticky='ew')
+    term_entry=ttk.Entry(studentInfoFrame)
+    term_entry.grid(row=2, column=1,  padx=10, pady=10, sticky='ew')
+
+    date_label = Label(studentInfoFrame, text="*Graduation Date")
+    date_label.grid(row=3, column=0, padx=10, pady=10, sticky='ew')
+    grad_date_entry=ttk.Entry(studentInfoFrame)
+    grad_date_entry.grid(row=3, column=1, padx=10, pady=10,  sticky='ew')
+
+    fname_label = Label(studentInfoFrame, text="*First Name")
+    fname_label.grid(row=4, column=0, padx=10, pady=10, sticky='ew')
+    first_name_entry=ttk.Entry(studentInfoFrame)
+    first_name_entry.grid(row=4, column=1, padx=10, pady=10,  sticky='ew')
+
+    mName_label = Label(studentInfoFrame, text="Middle Name")
+    mName_label.grid(row=5, column=0, padx=10, pady=10,  sticky='ew')
+    middle_name_entry=ttk.Entry(studentInfoFrame)
+    middle_name_entry.grid(row=5, column=1, padx=10, pady=10,  sticky='ew')
+
+    lNameLabel = Label(studentInfoFrame, text="*Last Name")
+    lNameLabel.grid(row=6, column=0, padx=10, pady=10,  sticky='ew')
+    last_name_entry=ttk.Entry(studentInfoFrame)
+    last_name_entry.grid(row=6, column=1, padx=10, pady=10,  sticky='ew') 
+
+    fullNameLabel = Label(studentInfoFrame, text="Full Name")
+    fullNameLabel.grid(row=1, column=2, padx=10, pady=10,  sticky='ew')
+    full_name_entry=ttk.Entry(studentInfoFrame)
+    full_name_entry.grid(row=1, column=3, padx=10, pady=10,  sticky='ew')
+
+    degreeLabel = Label(studentInfoFrame, text='*Degree')
+    degreeLabel.grid(row=2, column=2, padx=10, pady=10,  sticky='ew')
+    degree_1_entry=ttk.Combobox(studentInfoFrame, values=['Associate of Applied Science', 'Associate of Arts', 'Associate of Fine Arts', 'Associate of Science', 'Associate of Science in Teaching', 'Technical Certificate'])
+    degree_1_entry.grid(row=2, column=3, padx=10, pady=10,  sticky='ew')  
+
+    majorLabel = Label(studentInfoFrame, text='*Major')
+    majorLabel.grid(row=3, column=2, padx=10, pady=10, sticky='ew')
+    major_1_entry=ttk.Entry(studentInfoFrame)
+    major_1_entry.grid(row=3, column=3, padx=10, pady=10,  sticky='ew') 
+
+    concLabel = Label(studentInfoFrame, text='Concentration')
+    concLabel.grid(row=4, column=2, padx=10, pady=10, sticky='ew')
+    concentration_entry=ttk.Entry(studentInfoFrame)
+    concentration_entry.grid(row=4, column=3, padx=10, pady=10,  sticky='ew') 
+
+    honorLabel = Label(studentInfoFrame, text='Honors')
+    honorLabel.grid(row=5, column=2, padx=10, pady=10, sticky='ew')
+    honor_1_entry=ttk.Combobox(studentInfoFrame, values=['Cum Laude','Magna Cum Laude','Summa Cum Laude'])
+    honor_1_entry.grid(row=5, column=3, padx=10, pady=10,  sticky='ew') 
+
+    otherLabel= Label(studentInfoFrame, text='Other')
+    otherLabel.grid(row=6, column=2, padx=10, pady=10, sticky='ew')
+    other_entry=ttk.Entry(studentInfoFrame)
+    other_entry.grid(row=6, column=3, padx=10, pady=10,  sticky='ew')   
+
+
+    #controls frame
+    studentControlFrame= customtkinter.CTkFrame(enterGradRecord)
+    studentControlFrame.grid(row=1, column=0)
+
+    saveButton = customtkinter.CTkButton(studentControlFrame, text="Save", command=save)
+    saveButton.grid(row=0, column=0, padx=10, pady=20)
+
+    backButton = customtkinter.CTkButton(studentControlFrame, text="Back", command=close)
+    backButton.grid(row=0, column=1, padx=10, pady=20)
+
+    enterGradRecord.mainloop()
+
+# Remove one record
+def remove_one():
+    x = my_tree.selection()
+    my_tree.delete(x)
+    #rowNumber=int(x)+1
+
+    # Create a database or connect to one that exists
+    conn = sqlite3.connect(db)
+
+    # Create a cursor instance
+    c = conn.cursor()
+
+    # Delete From Database
+    studentID = student_id_entry.get()
+    degree1 = degree_1_entry.get()
+    major1 = major_1_entry.get()
+    concentration = concentration_entry.get()
+
+    c.execute(f"DELETE from graduates WHERE student_id='{studentID}' and degree_1='{degree1}' and major_1='{major1}' and concentration='{concentration}'")
+
+    # Commit changes
+    conn.commit()
+
+    # Close our connection
+    conn.close()
+
+    # Clear The Entry Boxes
+    clear_entries()
+
+    # Add a little message box for fun
+    messagebox.showinfo("Deleted!", "The Graduate's Record Has Been Deleted!")
+
+# Clear entry boxes
+def clear_entries():
+    # Clear entry boxes
+    student_id_entry.delete(0, END)
+    term_entry.delete(0, END)
+    grad_date_entry.delete(0, END)
+    first_name_entry.delete(0, END)
+    middle_name_entry.delete(0, END)
+    last_name_entry.delete(0, END)
+    full_name_entry.delete(0, END)
+    degree_1_entry.delete(0, END)
+    major_1_entry.delete(0, END)
+    concentration_entry.delete(0, END)
+    honor_1_entry.delete(0, END)
+    other_entry.delete(0, END)
+
+# Select Record
+def select_record(e):
+    # Clear entry boxes
+    clear_entries()
+
+    # Grab record Number
+    selected = my_tree.focus()
+
+    # Grab record values
+    values = my_tree.item(selected, 'values')
+
+    # outpus to entry boxes
+    student_id_entry.insert(0, values[0])
+    term_entry.insert(0, values[1])
+    grad_date_entry.insert(0, values[2])
+    first_name_entry.insert(0, values[3])
+    middle_name_entry.insert(0, values[4])
+    last_name_entry.insert(0, values[5])
+    full_name_entry.insert(0, values[6])
+    degree_1_entry.insert(0, values[7])
+    major_1_entry.insert(0, values[8])
+    concentration_entry.insert(0, values[9])
+    honor_1_entry.insert(0, values[10])
+    other_entry.insert(0, values[11])
+
+# Update record
+def update_record():
+    # Grab the record number
+    selected = my_tree.focus()
+
+    # Update record
+    my_tree.item(selected, text="", values=(student_id_entry.get(), term_entry.get(), grad_date_entry.get(), first_name_entry.get(), middle_name_entry.get(), last_name_entry.get(), full_name_entry.get(), degree_1_entry.get(), major_1_entry.get(), concentration_entry.get(), other_entry.get()))
+
+    # Update the database
+    # Create a database or connect to one that exists
+    conn = sqlite3.connect(db)
+
+    # Create a cursor instance
+    c = conn.cursor()
+
+    sql_statement=f"""UPDATE graduates
+        SET
+        student_id = {student_id_entry.get()},
+        term = {term_entry.get()},
+        grad_date = {grad_date_entry.get()},
+        first_name = {first_name_entry.get()},
+        middle_name = {middle_name_entry.get()},
+        last_name = {last_name_entry.get()},
+        full_name = {full_name_entry.get()},
+        degree_1 = {degree_1_entry.get()},
+        major_1 = {major_1_entry.get()},
+        concentration = {concentration_entry.get()},
+        honor = {honor_1_entry.get()},
+        other = {other_entry.get()}
+                 
+        WHERE student_id = student_id
+           and degree_1= degree_1
+           and major_1=major_1
+           and concentration = concentration """
+
+    c.execute(sql_statement)
+    
+    # Commit changes
+    conn.commit()
+
+    # Close our connection
+    conn.close()
+
+    # Clear entry boxes
+    clear_entries()
+
+#add new record to database
+def add_record():
+    # Update the database
+    # Create a database or connect to one that exists
+    conn = sqlite3.connect(db)
+
+    #Create a cursor instance
+    c = conn.cursor()
+
+    # Add New Record
+    c.execute("INSERT INTO graduates VALUES (:sid, :t, :gd, :fn, :mn, :ln, :fun, :degree, :major, :conc, :hon, :other)",
+        {
+            'sid': student_id_entry.get(),
+            't': term_entry.get(),
+            'gd': grad_date_entry.get(),
+            'fn': first_name_entry.get(),
+            'mn': middle_name_entry.get(),
+            'ln': last_name_entry.get(),
+            'fun': full_name_entry.get(),
+            'degree': degree_1_entry.get(),
+            'major': major_1_entry.get(),
+            'conc': concentration_entry.get(),
+            'hon': honor_1_entry.get(),
+            'other': other_entry.get()
+        })
+    # Commit changes
+    conn.commit()
+
+    # Close  connection
+    conn.close()
+
+    # Message box to alert the user that the record has been saved
+    messagebox.showinfo("Success!", "This graduate's information has been entered.")
+
+    # Clear entry boxes
+    clear_entries()
+
+    # Clear The Treeview Table
+    my_tree.delete(*my_tree.get_children())
+
+    # Run to pull data from database on start
+    query_database()
+
+def importStudentsAndAwards():
+    #Load file of new data
+        filepath=filedialog.askopenfilename(initialdir='./', title='Select a File', filetypes=(("Excel Files", "*.xlsx"),("CSV Files", '*.csv'),("All Files", '*.*')))
+        
+        importFile=filepath
+        importWorkBook=opxl.load_workbook(importFile)
+        sheet=importWorkBook.active
+
+        tkinter.messagebox.showinfo(title='Success!', message=importFile+" has been imported, click OK to finalize")
+
+        row_count = sheet.max_row
+        col_count = sheet.max_column
+
+        list_of_lists = []
+
+        for row in range(2, row_count+1):
+            list=[]
+            for column in range(1, col_count+1):
+                val=sheet.cell(row=row, column=column).value
+                list.append(val)
+            list_of_lists.append(list)
+
+        #for element in list_of_lists:
+            #print(element)
+            
+        for element in list_of_lists:
+            conn = sqlite3.connect(db)
+
+            insert_query = '''INSERT INTO graduates(student_id, term, grad_date, first_name, middle_name, last_name, full_name, degree_1, major_1, honor_1, concentration, other) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)'''
+
+            values = element
+                    
+            cursor=conn.cursor()
+            cursor.execute(insert_query, values)
+            conn.commit()
+            conn.close()           
+ 
+        tkinter.messagebox.showinfo(title='Success!', message='The new graduates have been added to the database')
+
+def close():
+   root.destroy()
+
+def generate():
+    global studentid
+    global fullName
+    global degreeType
+    global major1
+    global concentration
+    global gradDate
+    global honors
+
+    studentid = student_id_entry.get()
+    fullName = full_name_entry.get()
+    degreeType = degree_1_entry.get()
+    major1 = major_1_entry.get()
+    concentration = concentration_entry.get()
+    gradDate = grad_date_entry.get()
+    honors=honor_1_entry.get()
+
+    diploma.render({
+        "fullName" : fullName,
+        "degreeType" : degreeType,
+        "major": major1,
+        "concentration": concentration,
+        "honors": honors,
+        "graduationDate" : gradDate
+        })
+
+    diploma.save(f"DIPLOMA {studentid} {fullName} {degreeType} {major1}.docx")
+    
+    
+    messagebox.showinfo("Success!", "The students diploma has been created!")
+
+# Add Menu
+my_menu = Menu(root)
+root.config(menu=my_menu)
+
+# Configure our menu
+option_menu = Menu(my_menu, tearoff=0)
+my_menu.add_cascade(label="Options", menu=option_menu)
+# Drop down menu
+option_menu.add_command(label="Add Student", command=addStudent)
+#option_menu.add_command(label="Primary Color", command=primary_color)
+#option_menu.add_command(label="Secondary Color", command=secondary_color)
+#option_menu.add_command(label="Highlight Color", command=highlight_color)
+#option_menu.add_separator()
+#option_menu.add_command(label="Reset Colors", command=reset_colors)
+option_menu.add_separator()
+option_menu.add_command(label="Exit", command=root.quit)
+
+#Search Menu
+search_menu = Menu(my_menu, tearoff=0)
+my_menu.add_cascade(label="Search", menu=search_menu)
+# Drop down menu
+search_menu.add_command(label="Search by Student ID", command=lookup_records)
+search_menu.add_command(label="Search by Term", command=search_by_term)
+search_menu.add_command(label="Search by Degree", command=search_by_degree)
+search_menu.add_separator()
+search_menu.add_command(label="Refresh/Reset", command=query_database)
+
+
+# Add Some Style
+style = ttk.Style()
+
+# Pick A Theme
+style.theme_use('default')
+
+# Configure the Treeview Colors
+style.configure("Treeview",
+    background="#D3D3D3",
+    foreground="black",
+    rowheight=25,
+    fieldbackground="#D3D3D3")
+
+# Change Selected Color #347083
+style.map('Treeview',
+    background=[('selected', saved_highlight_color)])
+
+#Put title text at the top
+picText=Label(root, text="NSCC Office of the Registrar", pady=5,
+font="Helvetica")
+picText.pack(side='top')
+
+# Create a Treeview Frame
+tree_frame = Frame(root, padx=15, pady=5)
+tree_frame.pack(pady=10)
+
+# Create a Treeview Scrollbar
+tree_scroll = Scrollbar(tree_frame)
+tree_scroll.pack(side=RIGHT, fill=Y)
+
+tree_scroll_bottom = Scrollbar(tree_frame)
+tree_scroll_bottom.pack(side=BOTTOM, fill=X)
+
+# Create The Treeview
+my_tree = ttk.Treeview(tree_frame, yscrollcommand=tree_scroll.set, xscrollcommand=tree_scroll_bottom.set, selectmode="extended", show="headings")
+my_tree.pack()
+
+# Configure the Scrollbars
+tree_scroll.config(command=my_tree.yview)
+tree_scroll_bottom.config(command=my_tree.xview)
+
+# Define Our Columns
+my_tree['columns'] = ("A#", "Term", "Grad Date", "First Name", "Middle Name", "Last Name", "Full Name", "Degree", "Major", "Honors", "Concentration", "Other")
+
+# Format Our Columns
+my_tree.column( '#0', width=0, stretch=NO)
+#my_tree.column("rowID", anchor=W, width=50)
+my_tree.column("A#", anchor=W, width=100)
+my_tree.column("Term", anchor=W, width=100)
+my_tree.column("Grad Date", anchor=W, width=140)
+my_tree.column("First Name", anchor=W, width=140)
+my_tree.column("Middle Name", anchor=W, width=140)
+my_tree.column("Last Name", anchor=W, width=140)
+my_tree.column("Full Name", anchor=W, width=140)
+my_tree.column("Degree", anchor=W, width=140)
+my_tree.column("Major", anchor=W, width=160)
+my_tree.column("Honors", anchor=W, width=140)
+my_tree.column("Concentration", anchor=W, width=140)
+my_tree.column("Other", anchor=W, width=100)
+
+
+# Create Headings
+my_tree.heading("#0", text="", anchor=W)
+#my_tree.heading("credential_id", text="credential_id", anchor=W)
+my_tree.heading("A#", text="A#", anchor=CENTER)
+my_tree.heading("Term", text="Term", anchor=CENTER)
+my_tree.heading("Grad Date", text="Grad Date", anchor=CENTER)
+my_tree.heading("First Name", text="First Name", anchor=CENTER)
+my_tree.heading("Middle Name", text="Middle Name", anchor=CENTER)
+my_tree.heading("Last Name", text="Last Name", anchor=CENTER)
+my_tree.heading("Full Name", text="Full Name", anchor=CENTER)
+my_tree.heading("Degree", text="Degree", anchor=CENTER)
+my_tree.heading("Major", text="Major", anchor=CENTER)
+my_tree.heading("Honors", text="Honors", anchor=CENTER)
+my_tree.heading("Concentration", text="Concentration", anchor=CENTER)
+my_tree.heading("Other", text="Other", anchor=CENTER)
+
+# Create Striped Row Tags
+my_tree.tag_configure('oddrow', background=saved_primary_color)
+my_tree.tag_configure('evenrow', background=saved_secondary_color)
+
+# Add Record Entry Boxes
+data_frame = LabelFrame(root, text="Record")
+data_frame.pack(fill="x", expand="yes", padx=20)
+
+student_id_label = Label(data_frame, text="A#")
+student_id_label.grid(row=0, column=0, padx=10, pady=10)
+student_id_entry = Entry(data_frame)
+student_id_entry.grid(row=0, column=1, padx=10, pady=10)
+
+term_label = Label(data_frame, text="Term")
+term_label.grid(row=0, column=2, padx=10, pady=10)
+term_entry = Entry(data_frame)
+term_entry.grid(row=0, column=3, padx=10, pady=10)
+
+grad_date_label = Label(data_frame, text="Grad Date")
+grad_date_label.grid(row=0, column=4, padx=10, pady=10)
+grad_date_entry = Entry(data_frame)
+grad_date_entry.grid(row=0, column=5, padx=10, pady=10)
+#
+first_name_label = Label(data_frame, text="First Name")
+first_name_label.grid(row=0, column=6, padx=10, pady=10)
+first_name_entry = Entry(data_frame)
+first_name_entry.grid(row=0, column=7, padx=10, pady=10)
+
+middle_name_label = Label(data_frame, text="Middle Name")
+middle_name_label.grid(row=0, column=8, padx=10, pady=10)
+middle_name_entry = Entry(data_frame)
+middle_name_entry.grid(row=0, column=9, padx=10, pady=10)
+
+last_name_label = Label(data_frame, text="Last Name")
+last_name_label.grid(row=0, column=10, padx=10, pady=10)
+last_name_entry = Entry(data_frame)
+last_name_entry.grid(row=0, column=11, padx=10, pady=10)
+
+full_name_label = Label(data_frame, text="Full Name")
+full_name_label.grid(row=1, column=0, padx=10, pady=10)
+full_name_entry = Entry(data_frame)
+full_name_entry.grid(row=1, column=1, padx=10, pady=10)
+
+degree_1_label = Label(data_frame, text="Degree")
+degree_1_label.grid(row=1, column=2, padx=10, pady=10)
+degree_1_entry = Entry(data_frame)
+degree_1_entry.grid(row=1, column=3, padx=10, pady=10)
+
+major_1_label = Label(data_frame, text="Major")
+major_1_label.grid(row=1, column=4, padx=10, pady=10)
+major_1_entry = Entry(data_frame)
+major_1_entry.grid(row=1, column=5, padx=10, pady=10)
+
+concentration_label = Label(data_frame, text="Concentration")
+concentration_label.grid(row=1, column=6, padx=10, pady=10)
+concentration_entry = Entry(data_frame)
+concentration_entry.grid(row=1, column=7, padx=10, pady=10)
+
+honor_1_label = Label(data_frame, text="Honors")
+honor_1_label.grid(row=1, column=8, padx=10, pady=10)
+honor_1_entry = Entry(data_frame)
+honor_1_entry.grid(row=1, column=9, padx=10, pady=10)
+
+other_label = Label(data_frame, text="Other")
+other_label.grid(row=1, column=10, padx=10, pady=10)
+other_entry = Entry(data_frame)
+other_entry.grid(row=1, column=11, padx=10, pady=10)
+
+#Put logo in the data frame
+logo=Label(data_frame, image=img)
+logo.grid(row=0, column=55, rowspan=2)
+
+# Add Buttons
+button_frame = LabelFrame(root, text="Commands")
+button_frame.pack(fill="x", expand="yes", padx=20, pady=10)
+
+update_button = Button(button_frame, text="Update Record", command=update_record)
+update_button.grid(row=0, column=0, padx=10, pady=10)
+
+add_button = Button(button_frame, text="Add Record", command=add_record, bg="green")
+add_button.grid(row=0, column=1, padx=10, pady=10)
+
+remove_one_button = Button(button_frame, text="Deleted Selected Row", command=remove_one, bg="red")
+remove_one_button.grid(row=0, column=2, padx=10, pady=10)
+
+select_record_button = Button(button_frame, text="Clear Entry Boxes", command=clear_entries)
+select_record_button.grid(row=0, column=3, padx=10, pady=10)
+
+import_students_and_awards = Button(button_frame, text = "Import Students and Awards", command=importStudentsAndAwards)
+import_students_and_awards.grid(row=0, column=4, padx=10, pady=10)
+
+print_button = Button(button_frame, text="Generate Diploma", command=generate)
+print_button.grid(row=0, column=5, padx=10, pady=10)
+
+exitButton = Button(button_frame, text = "Exit", command=close, fg="red")
+exitButton.grid(row=0, column=6, padx=10, pady=10)
+
+#Put image in the button frame
+logo=Label(button_frame, image=img)
+logo.grid(row=0, column=55, padx=10, pady=10)
+
+# Bind the treeview
+my_tree.bind("<ButtonRelease-1>", select_record)
+
+
+
+# Run to pull data from database on start
+query_database()
+
+root.mainloop()

@@ -1,0 +1,37 @@
+# Databases containing student data
+*.db
+*.sqlite
+*.sqlite3
+
+# Excel files
+*.xlsx
+*.xls
+~$*.xlsx
+
+# CSV/data exports
+*.csv
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environments
+.venv/
+venv/
+
+# Environment / secrets
+.env
+*.env
+
+# VS Code local settings
+.vscode/
+
+# Temporary files
+*.tmp
+*.log
+
+# Archive Files
+*.zip
+
+# Generated diploma output
+**/StudentDiplomas/

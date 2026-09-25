@@ -6,6 +6,7 @@ The application uses student credential data to generate formatted diploma docum
 
 ## Application Interface
 
+
 Sample%20Files%20and%20Templates/User%20Interface.png
 
 ## Features
